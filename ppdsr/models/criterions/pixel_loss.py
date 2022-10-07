@@ -1,4 +1,4 @@
-#   Copyright (c) 2022 PaddlePaddle Authors. All Rights Reserve.
+#   Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,50 +13,12 @@
 # limitations under the License.
 
 import numpy as np
+from ..generators.generater_lapstyle import calc_mean_std, mean_variance_norm
 
 import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
 from .builder import CRITERIONS
-
-
-def calc_mean_std(feat, eps=1e-5):
-    """calculate mean and standard deviation.
-
-    Args:
-        feat (Tensor): Tensor with shape (N, C, H, W).
-        eps (float): Default: 1e-5.
-
-    Return:
-        mean and std of feat
-        shape: [N, C, 1, 1]
-    """
-    size = feat.shape
-    assert (len(size) == 4)
-    N, C = size[:2]
-    feat_var = feat.reshape([N, C, -1])
-    feat_var = paddle.var(feat_var, axis=2) + eps
-    feat_std = paddle.sqrt(feat_var)
-    feat_std = feat_std.reshape([N, C, 1, 1])
-    feat_mean = feat.reshape([N, C, -1])
-    feat_mean = paddle.mean(feat_mean, axis=2)
-    feat_mean = feat_mean.reshape([N, C, 1, 1])
-    return feat_mean, feat_std
-
-
-def mean_variance_norm(feat):
-    """mean_variance_norm.
-
-    Args:
-        feat (Tensor): Tensor with shape (N, C, H, W).
-
-    Return:
-        Normalized feat with shape (N, C, H, W)
-    """
-    size = feat.shape
-    mean, std = calc_mean_std(feat)
-    normalized_feat = (feat - mean.expand(size)) / std.expand(size)
-    return normalized_feat
 
 
 @CRITERIONS.register()
@@ -287,23 +249,25 @@ class CalcStyleLoss():
 class EdgeLoss():
     def __init__(self):
         k = paddle.to_tensor([[.05, .25, .4, .25, .05]])
-        self.kernel = paddle.matmul(k.t(),k).unsqueeze(0).tile([3,1,1,1])
+        self.kernel = paddle.matmul(k.t(), k).unsqueeze(0).tile([3, 1, 1, 1])
         self.loss = CharbonnierLoss()
 
     def conv_gauss(self, img):
         n_channels, _, kw, kh = self.kernel.shape
-        img = F.pad(img, [kw//2, kh//2, kw//2, kh//2], mode='replicate')
+        img = F.pad(img, [kw // 2, kh // 2, kw // 2, kh // 2], mode='replicate')
         return F.conv2d(img, self.kernel, groups=n_channels)
 
     def laplacian_kernel(self, current):
-        filtered    = self.conv_gauss(current)    # filter
-        down        = filtered[:,:,::2,::2]               # downsample
-        new_filter  = paddle.zeros_like(filtered)
-        new_filter[:,:,::2,::2] = down*4                  # upsample
-        filtered    = self.conv_gauss(new_filter) # filter
+        filtered = self.conv_gauss(current)  # filter
+        down = filtered[:, :, ::2, ::2]  # downsample
+        new_filter = paddle.zeros_like(filtered)
+        new_filter.stop_gradient = True
+        new_filter[:, :, ::2, ::2] = down * 4  # upsample
+        filtered = self.conv_gauss(new_filter)  # filter
         diff = current - filtered
         return diff
 
     def __call__(self, x, y):
+        y.stop_gradient = True
         loss = self.loss(self.laplacian_kernel(x), self.laplacian_kernel(y))
         return loss

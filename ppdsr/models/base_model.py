@@ -19,7 +19,9 @@ import numpy as np
 from collections import OrderedDict
 from abc import ABC, abstractmethod
 
+from .criterions.builder import build_criterion
 from ..solver import build_lr_scheduler, build_optimizer
+from ..utils.visual import tensor2img
 
 
 class BaseModel(ABC):
@@ -181,7 +183,7 @@ class BaseModel(ABC):
                 for param in net.parameters():
                     param.trainable = requires_grad
 
-    def export_model(self, export_model, output_dir=None, inputs_size=[]):
+    def export_model(self, export_model, output_dir=None, inputs_size=[], export_serving_model=False, model_name=None):
         inputs_num = 0
         for net in export_model:
             input_spec = [
@@ -194,8 +196,23 @@ class BaseModel(ABC):
                                                 input_spec=input_spec)
             if output_dir is None:
                 output_dir = 'inference_model'
+            if model_name is None:
+                model_name = '{}_{}'.format(self.__class__.__name__.lower(),
+                                               net["name"])
             paddle.jit.save(
                 static_model,
                 os.path.join(
-                    output_dir, '{}_{}'.format(self.__class__.__name__.lower(),
-                                               net["name"])))
+                    output_dir, model_name))
+            if export_serving_model:
+                from paddle_serving_client.io import inference_model_to_serving
+                model_name = '{}_{}'.format(self.__class__.__name__.lower(),
+                                                    net["name"])
+
+                inference_model_to_serving(
+                    dirname=output_dir,
+                    serving_server="{}/{}/serving_server".format(output_dir,
+                                                                model_name),
+                    serving_client="{}/{}/serving_client".format(output_dir,
+                                                                model_name),
+                    model_filename="{}.pdmodel".format(model_name),
+                    params_filename="{}.pdiparams".format(model_name))

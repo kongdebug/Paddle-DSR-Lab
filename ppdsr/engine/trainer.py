@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import sys
 import time
 import copy
 
@@ -29,11 +30,14 @@ from ..utils.filesystem import makedirs, save, load
 from ..utils.timer import TimeAverager
 from ..utils.profiler import add_profiler_step
 
+
 class IterLoader:
+
     def __init__(self, dataloader):
         self._dataloader = dataloader
         self.iter_loader = iter(self._dataloader)
         self._epoch = 1
+        self._inner_iter = 0
 
     @property
     def epoch(self):
@@ -41,12 +45,17 @@ class IterLoader:
 
     def __next__(self):
         try:
+            if sys.platform == "Windows" and self._inner_iter == len(
+                    self._dataloader) - 1:
+                self._inner_iter = 0
+                raise StopIteration
             data = next(self.iter_loader)
         except StopIteration:
             self._epoch += 1
             self.iter_loader = iter(self._dataloader)
             data = next(self.iter_loader)
 
+        self._inner_iter += 1
         return data
 
     def __len__(self):
@@ -71,6 +80,7 @@ class Trainer:
     #                     |                                    ||
     #         save checkpoint (model.nets)                     \/
     """
+
     def __init__(self, cfg):
         # base config
         self.logger = logging.getLogger(__name__)
@@ -93,9 +103,6 @@ class Trainer:
 
         # build model
         self.model = build_model(cfg.model)
-        # multiple gpus prepare
-        if ParallelEnv().nranks > 1:
-            self.distributed_data_parallel()
 
         # build metrics
         self.metrics = None
@@ -111,10 +118,6 @@ class Trainer:
             import visualdl
             self.vdl_logger = visualdl.LogWriter(logdir=cfg.output_dir)
 
-        # evaluate only
-        if not cfg.is_train:
-            return
-
         # build train dataloader
         self.train_dataloader = build_dataloader(cfg.dataset.train)
         self.iters_per_epoch = len(self.train_dataloader)
@@ -128,6 +131,17 @@ class Trainer:
         # build optimizers
         self.optimizers = self.model.setup_optimizers(self.lr_schedulers,
                                                       cfg.optimizer)
+
+        # setup amp train
+        self.scaler = self.setup_amp_train() if self.cfg.amp else None
+
+        # multiple gpus prepare
+        if ParallelEnv().nranks > 1:
+            self.distributed_data_parallel()
+
+        # evaluate only
+        if not cfg.is_train:
+            return
 
         self.epochs = cfg.get('epochs', None)
         if self.epochs:
@@ -148,6 +162,26 @@ class Trainer:
         self.best_metric = {}
         self.model.set_total_iter(self.total_iters)
         self.profiler_options = cfg.profiler_options
+
+    def setup_amp_train(self):
+        """ decerate model, optimizer and return a GradScaler """
+
+        self.logger.info('use AMP to train. AMP level = {}'.format(
+            self.cfg.amp_level))
+        scaler = paddle.amp.GradScaler(init_loss_scaling=1024)
+        # need to decorate model and optim if amp_level == 'O2'
+        if self.cfg.amp_level == 'O2':
+            nets, optimizers = list(self.model.nets.values()), list(
+                self.optimizers.values())
+            nets, optimizers = paddle.amp.decorate(models=nets,
+                                                   optimizers=optimizers,
+                                                   level='O2',
+                                                   save_dtype='float32')
+            for i, (k, _) in enumerate(self.model.nets.items()):
+                self.model.nets[k] = nets[i]
+            for i, (k, _) in enumerate(self.optimizers.items()):
+                self.optimizers[k] = optimizers[i]
+        return scaler
 
     def distributed_data_parallel(self):
         paddle.distributed.init_parallel_env()
@@ -187,7 +221,12 @@ class Trainer:
             # unpack data from dataset and apply preprocessing
             # data input should be dict
             self.model.setup_input(data)
-            self.model.train_iter(self.optimizers)
+
+            if self.cfg.amp:
+                self.model.train_iter_amp(self.optimizers, self.scaler,
+                                          self.cfg.amp_level)  # amp train
+            else:
+                self.model.train_iter(self.optimizers)  # norm train
 
             batch_cost_averager.record(
                 time.time() - step_start_time,
@@ -429,15 +468,35 @@ class Trainer:
     def load(self, weight_path):
         state_dicts = load(weight_path)
 
-        for net_name, net in self.model.nets.items():
-            if net_name in state_dicts:
-                net.set_state_dict(state_dicts[net_name])
-                self.logger.info(
-                    'Loaded pretrained weight for net {}'.format(net_name))
+        def is_dict_in_dict_weight(state_dict):
+            if isinstance(state_dict, dict) and len(state_dict) > 0:
+                val = list(state_dict.values())[0]
+                if isinstance(val, dict):
+                    return True
+                else:
+                    return False
             else:
-                self.logger.warning(
-                    'Can not find state dict of net {}. Skip load pretrained weight for net {}'
-                    .format(net_name, net_name))
+                return False
+
+        if is_dict_in_dict_weight(state_dicts):
+            for net_name, net in self.model.nets.items():
+                if net_name in state_dicts:
+                    net.set_state_dict(state_dicts[net_name])
+                    self.logger.info(
+                        'Loaded pretrained weight for net {}'.format(net_name))
+                else:
+                    self.logger.warning(
+                        'Can not find state dict of net {}. Skip load pretrained weight for net {}'
+                        .format(net_name, net_name))
+        else:
+            assert len(self.model.nets
+                       ) == 1, 'checkpoint only contain weight of one net, \
+                                                but model contains more than one net!'
+
+            net_name, net = list(self.model.nets.items())[0]
+            net.set_state_dict(state_dicts)
+            self.logger.info(
+                'Loaded pretrained weight for net {}'.format(net_name))
 
     def close(self):
         """
