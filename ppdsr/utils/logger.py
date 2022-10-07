@@ -21,9 +21,9 @@ from paddle.distributed import ParallelEnv
 logger_initialized = []
 
 
-def setup_logger(output=None, name="ppgan"):
+def setup_logger(output=None, name="ppdsr"):
     """
-    Initialize the ppgan logger and set its verbosity level to "INFO".
+    Initialize the ppdsr logger and set its verbosity level to "INFO".
 
     Args:
         output (str): a file name or a directory to save log. If None, will not save log file.
@@ -72,7 +72,7 @@ def setup_logger(output=None, name="ppgan"):
     return logger
 
 
-def get_logger(name='ppgan'):
+def get_logger(name='ppdsr'):
     logger = logging.getLogger(name)
     if name in logger_initialized:
         return logger

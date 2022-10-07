@@ -29,7 +29,7 @@ from tqdm import tqdm
 
 from .logger import get_logger
 
-PPGAN_HOME = os.path.expanduser(os.path.join('~', '.cache', 'ppgan'))
+PPDSR_HOME = os.path.expanduser(os.path.join('~', '.cache', 'ppdsr'))
 
 DOWNLOAD_RETRY_LIMIT = 3
 
@@ -67,12 +67,12 @@ def get_path_from_url(url, md5sum=None, check_exist=True):
     from paddle.distributed import ParallelEnv
 
     assert is_url(url), "downloading from {} not a url".format(url)
-    root_dir = PPGAN_HOME
+    root_dir = PPDSR_HOME
     # parse path after download to decompress under root_dir
     fullpath = _map_path(url, root_dir)
 
     if osp.exists(fullpath) and check_exist and _md5check(fullpath, md5sum):
-        logger = get_logger('ppgan')
+        logger = get_logger('ppdsr')
         logger.info("Found {}".format(fullpath))
     else:
         if ParallelEnv().local_rank == 0:
@@ -109,7 +109,7 @@ def _download(url, path, md5sum=None):
             raise RuntimeError("Download from {} failed. "
                                "Retry limit reached".format(url))
 
-        logger = get_logger('ppgan')
+        logger = get_logger('ppdsr')
         logger.info("Downloading {} from {} to {}".format(fname, url, fullname))
 
         req = requests.get(url, stream=True)
@@ -140,7 +140,7 @@ def _md5check(fullname, md5sum=None):
     if md5sum is None:
         return True
 
-    logger = get_logger('ppgan')
+    logger = get_logger('ppdsr')
     logger.info("File {} md5 checking...".format(fullname))
     md5 = hashlib.md5()
     with open(fullname, 'rb') as f:
@@ -159,7 +159,7 @@ def _decompress(fname):
     """
     Decompress for zip and tar file
     """
-    logger = get_logger('ppgan')
+    logger = get_logger('ppdsr')
 
     logger.info("Decompressing {}...".format(fname))
 

@@ -19,7 +19,7 @@ import traceback
 class Registry(object):
     """
     The registry that provides name -> object mapping, to support third-party users' custom modules.
-    To create a registry (inside ppgan):
+    To create a registry (inside ppdsr):
     .. code-block:: python
         BACKBONE_REGISTRY = Registry('BACKBONE')
     To register an object:
@@ -84,7 +84,7 @@ def build_from_config(cfg, registry, default_args=None):
 
     Args:
         cfg (dict): Config dict. It should at least contain the key "name".
-        registry (ppgan.utils.Registry): The registry to search the name from.
+        registry (ppdsr.utils.Registry): The registry to search the name from.
         default_args (dict, optional): Default initialization arguments.
 
     Returns:
@@ -98,7 +98,7 @@ def build_from_config(cfg, registry, default_args=None):
                 '`cfg` or `default_args` must contain the key "name", '
                 f'but got {cfg}\n{default_args}')
     if not isinstance(registry, Registry):
-        raise TypeError('registry must be an ppgan.utils.Registry object, '
+        raise TypeError('registry must be an ppdsr.utils.Registry object, '
                         f'but got {type(registry)}')
     if not (isinstance(default_args, dict) or default_args is None):
         raise TypeError('default_args must be a dict or None, '

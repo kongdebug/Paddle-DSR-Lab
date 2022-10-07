@@ -15,7 +15,6 @@
 import paddle
 
 from .generators.builder import build_generator
-from .discriminators.builder import build_discriminator
 from .generators.drn import DownBlock
 from .sr_model import BaseSRModel
 from .builder import MODELS
@@ -66,17 +65,9 @@ class DRN(BaseSRModel):
             self.nets['dual_model_' + str(i)] = dual_model
             init_weights(self.nets['dual_model_' + str(i)])
 
-        if discriminator:
-            self.nets['discriminator'] = build_discriminator(discriminator)
-
         if pixel_criterion:
             self.pixel_criterion = build_criterion(pixel_criterion)
 
-        if perceptual_criterion:
-            self.perceptual_criterion = build_criterion(perceptual_criterion)
-
-        if gan_criterion:
-            self.gan_criterion = build_criterion(gan_criterion)
 
     def setup_input(self, input):
         self.lq = paddle.to_tensor(input['lq'])

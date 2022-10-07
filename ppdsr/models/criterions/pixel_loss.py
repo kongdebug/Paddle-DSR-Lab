@@ -13,12 +13,51 @@
 # limitations under the License.
 
 import numpy as np
-from ..generators.generater_lapstyle import calc_mean_std, mean_variance_norm
 
 import paddle
 import paddle.nn as nn
 import paddle.nn.functional as F
 from .builder import CRITERIONS
+
+
+def calc_mean_std(feat, eps=1e-5):
+    """calculate mean and standard deviation.
+
+    Args:
+        feat (Tensor): Tensor with shape (N, C, H, W).
+        eps (float): Default: 1e-5.
+
+    Return:
+        mean and std of feat
+        shape: [N, C, 1, 1]
+    """
+    size = feat.shape
+    assert (len(size) == 4)
+    N, C = size[:2]
+    feat_var = feat.reshape([N, C, -1])
+    feat_var = paddle.var(feat_var, axis=2) + eps
+    feat_std = paddle.sqrt(feat_var)
+    feat_std = feat_std.reshape([N, C, 1, 1])
+    feat_mean = feat.reshape([N, C, -1])
+    feat_mean = paddle.mean(feat_mean, axis=2)
+    feat_mean = feat_mean.reshape([N, C, 1, 1])
+    return feat_mean, feat_std
+
+
+def mean_variance_norm(feat):
+    """mean_variance_norm.
+
+    Args:
+        feat (Tensor): Tensor with shape (N, C, H, W).
+
+    Return:
+        Normalized feat with shape (N, C, H, W)
+    """
+    size = feat.shape
+    mean, std = calc_mean_std(feat)
+    normalized_feat = (feat - mean.expand(size)) / std.expand(size)
+    return normalized_feat
+
 
 
 @CRITERIONS.register()
