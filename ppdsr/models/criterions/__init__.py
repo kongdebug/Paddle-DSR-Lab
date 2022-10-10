@@ -6,4 +6,3 @@ from .gradient_penalty import GradientPenalty
 from .builder import build_criterion
 
 from .ssim import SSIM
-from .id_loss import IDLoss

@@ -1,7 +1,7 @@
 total_iters: 1000000
 output_dir: output_dir
 # tensor range for function tensor2img
-min_max:
+min_max: 
   (0., 255.)
 
 model:
