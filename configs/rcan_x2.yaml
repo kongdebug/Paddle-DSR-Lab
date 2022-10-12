@@ -8,7 +8,7 @@ model:
   name: RCANModel
   generator:
     name: RCAN
-    scale: 4
+    scale: 2
     n_resgroups: 10
     n_resblocks: 20
   pixel_criterion:
@@ -17,11 +17,11 @@ model:
 dataset:
   train:
     name: SRDataset
-    gt_folder: ./data/DocIMG/x4
+    gt_folder: ./data/DocIMG/x2
     lq_folder: ./data/DocIMG/x
     num_workers: 4
     batch_size: 16
-    scale: 4
+    scale: 2
     preprocess:
       - name: LoadImageFromFile
         key: lq
@@ -31,8 +31,8 @@ dataset:
         input_keys: [lq, gt]
         pipeline:
           - name: SRPairedRandomCrop
-            gt_patch_size: 288
-            scale: 4
+            gt_patch_size: 144
+            scale: 2
             keys: [image, image]
           - name: PairedRandomHorizontalFlip
             keys: [image, image]
@@ -48,9 +48,9 @@ dataset:
             keys: [image, image]
   test:
     name: SRDataset
-    gt_folder: ./data/test_doc/x4
+    gt_folder: ./data/test_doc/x2
     lq_folder: ./data/test_doc/x
-    scale: 4
+    scale: 2
     preprocess: 
       - name: LoadImageFromFile
         key: lq
