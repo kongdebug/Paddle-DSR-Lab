@@ -54,7 +54,7 @@ def save(state_dicts, file_name):
             final_dict[k] = v
 
     with open(file_name, 'wb') as f:
-        pickle.dump(final_dict, f, protocol=2)
+        pickle.dump(final_dict, f, protocol=4)
 
 
 def load(file_name):

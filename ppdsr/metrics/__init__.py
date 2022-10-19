@@ -14,3 +14,4 @@
 
 from .psnr_ssim import PSNR, SSIM
 from .builder import build_metric
+from .rmse_mad_pe import RMSE, MAD, PE
