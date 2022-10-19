@@ -153,23 +153,23 @@ def main_extract_subimages(args):
         Remember to modify opt configurations according to your settings.
     """
 
-    opt = {}
-    opt['n_thread'] = args.n_thread
-    opt['compression_level'] = args.compression_level
+    for scale in args.scales:
+        opt = {}
+        opt['n_thread'] = args.n_thread
+        opt['compression_level'] = args.compression_level
 
-    # HR images
-    opt['input_folder'] = osp.join(args.data_root, 'PMBA_HR')
-    opt['save_folder'] = osp.join(args.data_root, 'PMBA_HR_sub')
-    opt['crop_size'] = args.crop_size
-    opt['step'] = args.step
-    opt['thresh_size'] = args.thresh_size
-    extract_subimages(opt)
+        # HR images
+        opt['input_folder'] = osp.join(args.data_root, 'PMBA_HR_x{}'.format(scale))
+        opt['save_folder'] = osp.join(args.data_root, 'PMBA_HR_x{}_sub'.format(scale))
+        opt['crop_size'] = args.crop_size
+        opt['step'] = args.step
+        opt['thresh_size'] = args.thresh_size
+        extract_subimages(opt)
 
-    for scale in [2, 4]:
         opt['input_folder'] = osp.join(args.data_root,
-                                       f'PMBA_LR/x{scale}')
+                                    f'PMBA_LR/x{scale}')
         opt['save_folder'] = osp.join(args.data_root,
-                                      f'PMBA_LR/x{scale}_sub')
+                                    f'PMBA_LR/x{scale}_sub')
         opt['crop_size'] = args.crop_size // scale
         opt['step'] = args.step // scale
         opt['thresh_size'] = args.thresh_size // scale
@@ -229,9 +229,6 @@ def worker(path, opt):
     thresh_size = opt['thresh_size']
     img_name, extension = osp.splitext(osp.basename(path))
 
-    # remove the x2, x3, x4 and x8 in the filename for PMBA
-    img_name = re.sub('x[2348]', '', img_name)
-
     img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
 
     if img.ndim == 2 or img.ndim == 3:
@@ -283,6 +280,10 @@ def parse_args():
     parser.add_argument('--n-thread',
                         nargs='?',
                         default=20,
+                        help='thread number when using multiprocessing')
+    parser.add_argument('--scales',
+                        type=list,
+                        default=[2, 4],
                         help='thread number when using multiprocessing')
 
     args = parser.parse_args()

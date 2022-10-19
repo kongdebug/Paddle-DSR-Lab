@@ -15,3 +15,5 @@
 from .base_model import BaseModel
 from .drn_model import DRN
 from .rcan_model import RCANModel
+from .pmba_model import PMBAModel
+from .sr_model import BaseSRModel

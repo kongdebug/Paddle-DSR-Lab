@@ -5,7 +5,7 @@ min_max:
   (0., 1.)
 
 model:
-  name: BaseSRModel
+  name: PMBAModel
   generator:
     name: PMBANet
     num_channels: 1
@@ -22,7 +22,7 @@ dataset:
   train:
     name: SRDataset
     gt_folder: data/PMBA/PMBA_HR_sub
-    lq_folder: data/PMBA/PMBA_LR/x2_sub
+    lq_folder: data/PMBA/PMBA_LR/x4_sub
     num_workers: 4
     batch_size: 16
     scale: 4
@@ -93,12 +93,20 @@ validate:
     psnr: # metric name, can be arbitrary
       name: PSNR
       crop_border: 4
-      test_y_channel: True
+      test_y_channel: False
     ssim:
       name: SSIM
       crop_border: 4
-      test_y_channel: True
-
+      test_y_channel: False
+    rmse:
+      name: RMSE
+      crop_border: 0
+    mad:
+      name: MAD
+      crop_border: 0
+    pe:
+      name: PE
+      crop_border: 0
 log_config:
   interval: 10
   visiual_interval: 500
