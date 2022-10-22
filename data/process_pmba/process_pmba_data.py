@@ -267,7 +267,7 @@ def parse_args():
                         help='cropped size for HR images')
     parser.add_argument('--step',
                         nargs='?',
-                        default=32,
+                        default=64,
                         help='step size for HR images')
     parser.add_argument('--thresh-size',
                         nargs='?',

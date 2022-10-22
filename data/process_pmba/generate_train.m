@@ -1,6 +1,6 @@
 function Prepare_TestData_HR_LR()
 clear all; close all; clc
-path_original = 'D:\PaddleRepo\Paddle-DSR-Lab\data';
+path_original = 'D:\PaddleRepo';
 dataset  = {'data_all'};
 ext = {'*.jpg', '*.png', '*.bmp'};
 
