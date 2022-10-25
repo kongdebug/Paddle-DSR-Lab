@@ -9,3 +9,4 @@ easydict
 munch
 natsort
 matplotlib
+h5py

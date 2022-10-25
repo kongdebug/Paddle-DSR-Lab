@@ -15,3 +15,4 @@
 from .drn import DRNGenerator
 from .rcan import RCAN
 from .pmbanet import PMBANet
+from .wafp import WAFPNet

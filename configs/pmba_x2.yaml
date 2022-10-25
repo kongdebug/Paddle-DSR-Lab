@@ -1,5 +1,5 @@
-total_iters: 1500000
-output_dir: output_dir
+total_iters: 480000
+output_dir: /root/paddlejob/workspace/output
 # tensor range for function tensor2img
 min_max:
   (0., 1.)
@@ -24,7 +24,7 @@ dataset:
     gt_folder: data/PMBA/PMBA_HR_x2_sub
     lq_folder: data/PMBA/PMBA_LR/x2_sub
     num_workers: 4
-    batch_size: 32
+    batch_size: 8
     scale: 2
     preprocess:
       - name: LoadImageFromFile
@@ -72,8 +72,8 @@ dataset:
 
 lr_scheduler:
   name: MultiStepDecay
-  learning_rate: 0.0004
-  milestones: [350000, 700000, 1050000, 1400000]
+  learning_rate: 0.0001
+  milestones: [200000, 400000, 500000]
   gamma: 0.1
 
 optimizer:

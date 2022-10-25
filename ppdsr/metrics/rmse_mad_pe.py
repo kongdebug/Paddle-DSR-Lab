@@ -35,6 +35,7 @@ class RMSE(PSNR):
             single_seq = []
 
         for pred, gt in zip(preds, gts):
+            pred, gt = pred[:, :, 0:1], gt[:, :, 0:1]
             value = calculate_rmse(pred, gt, self.crop_border, self.input_order)
             if is_seq:
                 single_seq.append(value)
@@ -61,6 +62,7 @@ class MAD(PSNR):
             single_seq = []
 
         for pred, gt in zip(preds, gts):
+            pred, gt = pred[:, :, 0:1], gt[:, :, 0:1]
             value = calculate_mad(pred, gt, self.crop_border, self.input_order)
             if is_seq:
                 single_seq.append(value)
@@ -87,6 +89,7 @@ class PE(PSNR):
             single_seq = []
 
         for pred, gt in zip(preds, gts):
+            pred, gt = pred[:, :, 0:1], gt[:, :, 0:1]
             value = calculate_pe(pred, gt, self.crop_border, self.input_order)
             if is_seq:
                 single_seq.append(value)
@@ -219,7 +222,7 @@ def calculate_pe(img1,
 
     diff = img1 - img2
     h, w = diff.shape[:2]
-    pe = abs(diff)/ img2 * 100
+    pe = np.sum(abs(diff)/ img2) / (h*w)
     
     if pe == 0:
         return float('inf')

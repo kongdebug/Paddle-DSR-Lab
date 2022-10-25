@@ -13,9 +13,7 @@
 # limitations under the License.
 
 import os
-import copy
 
-from pathlib import Path
 from .base_dataset import BaseDataset
 from .builder import DATASETS
 
