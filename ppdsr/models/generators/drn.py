@@ -1,5 +1,5 @@
 # MIT License
-# Copyright (c) 2020 Yong Guo
+# Copyright (c) 2022 Yong Guo
 # code was based on https://github.com/guoyongcs/DRN
 
 import math

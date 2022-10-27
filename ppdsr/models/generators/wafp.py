@@ -152,6 +152,7 @@ class WAFPNet(nn.Layer):
         self.residual_layer = self.make_layer(Conv_ReLU_Block,
                                               num_residual_layer)
         self.refine_layer = self.make_layer(Conv_ReLU_Block, num_refine_layer)
+        self.init_weights()
 
     def make_layer(self, block: Callable, num_of_layer: int):
         layers = []

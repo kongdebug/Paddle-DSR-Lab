@@ -1,4 +1,4 @@
-# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.
+# Copyright (c) 2022 PaddlePaddle Authors. All Rights Reserve.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,3 +17,4 @@ from .drn_model import DRN
 from .rcan_model import RCANModel
 from .pmba_model import PMBAModel
 from .sr_model import BaseSRModel
+from .wafp_model import WAFPModel

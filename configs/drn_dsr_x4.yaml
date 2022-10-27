@@ -35,7 +35,7 @@ dataset:
         output_keys: [lq, lqx2, gt]
         pipeline:
           - name: SRPairedRandomCrop
-            gt_patch_size: 128
+            gt_patch_size: 96
             scale: 4
             scale_list: True
             keys: [image, image]
