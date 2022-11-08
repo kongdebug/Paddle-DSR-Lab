@@ -27,7 +27,7 @@ from ..modules.init import reset_parameters
 class PMBAModel(BaseModel):
     """Base SR model for single image super-resolution.
     """
-    def __init__(self, generator, pixel_criterion=None, use_init_weight=False):
+    def __init__(self, generator, pixel_criterion=None, use_init_weight=False, window_size=16, scale=4):
         """
         Args:
             generator (dict): config of generator.
@@ -41,6 +41,9 @@ class PMBAModel(BaseModel):
             self.pixel_criterion = build_criterion(pixel_criterion)
         if use_init_weight:
             init_sr_weight(self.nets['generator'])
+        
+        self.window_size = window_size
+        self.scale = scale
 
     def setup_input(self, input):
         self.lq = paddle.to_tensor(input['lq'])[:, 0:1, :, :]
@@ -67,8 +70,15 @@ class PMBAModel(BaseModel):
 
     def test_iter(self, metrics=None):
         self.nets['generator'].eval()
+        img_lq = self.lq
+        _, _, h_old, w_old = img_lq.shape
+        h_pad = (h_old // self.window_size + 1) * self.window_size - h_old
+        w_pad = (w_old // self.window_size + 1) * self.window_size - w_old
+        img_lq = paddle.concat([img_lq, paddle.flip(img_lq, [2])], 2)[:, :, :h_old + h_pad, :]
+        img_lq = paddle.concat([img_lq, paddle.flip(img_lq, [3])], 3)[:, :, :, :w_old + w_pad]
         with paddle.no_grad():
-            self.output = self.nets['generator'](self.lq)
+            output = self.nets['generator'](img_lq)
+            self.output = output[..., :h_old * self.scale, :w_old * self.scale]
             self.visual_items['output'] = self.output
         self.nets['generator'].train()
 

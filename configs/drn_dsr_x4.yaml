@@ -1,4 +1,4 @@
-total_iters: 250000
+total_iters: 110000
 output_dir: /root/paddlejob/workspace/output
 # tensor range for function tensor2img
 min_max:
@@ -20,10 +20,10 @@ model:
 dataset:
   train:
     name: SRDataset
-    gt_folder: data/PMBA/PMBA_HR_x4_sub
-    lq_folder: data/PMBA/PMBA_LR/x4_sub
+    gt_folder: ./data/PMBA/data_all_HR_x4
+    lq_folder: ./data/PMBA/data_all_LR_x4
     num_workers: 4
-    batch_size: 16
+    batch_size: 24
     scale: 4
     preprocess:
       - name: LoadImageFromFile
@@ -35,7 +35,7 @@ dataset:
         output_keys: [lq, lqx2, gt]
         pipeline:
           - name: SRPairedRandomCrop
-            gt_patch_size: 96
+            gt_patch_size: 360
             scale: 4
             scale_list: True
             keys: [image, image]
@@ -53,8 +53,8 @@ dataset:
             keys: [image, image, image]
   test:
     name: SRDataset
-    gt_folder: data/PMBA/test_gt
-    lq_folder: data/PMBA/testx4
+    gt_folder: ./data/PMBA/test_HR
+    lq_folder: ./data/PMBA/test_LR_x4
     scale: 4
     preprocess:
       - name: LoadImageFromFile
@@ -70,11 +70,10 @@ dataset:
             mean: [0., 0., 0.]
             std: [1., 1., 1.]
             keys: [image, image]
-
 lr_scheduler:
   name: CosineAnnealingRestartLR
-  learning_rate: 0.0002
-  periods: [250000]
+  learning_rate: 0.0001
+  periods: [110000]
   restart_weights: [1]
   eta_min: !!float 1e-7
 
@@ -123,4 +122,4 @@ log_config:
   visiual_interval: 500
 
 snapshot_config:
-  interval: 10000
+  interval: 5000

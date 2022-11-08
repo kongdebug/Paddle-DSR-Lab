@@ -1,31 +1,27 @@
-total_iters: 480000
+total_iters: 166250
 output_dir: /root/paddlejob/workspace/output
 # tensor range for function tensor2img
-min_max:
-  (0., 1.)
+min_max: 
+  (0., 255.)
 
 model:
-  name: PMBAModel
+  name: RCANModel
   generator:
-    name: PMBANet
-    num_channels: 1
-    base_filter: 64
-    feat: 256
-    scale_factor: 2
+    name: RCAN
+    scale: 4
+    n_resgroups: 10
+    n_resblocks: 20
   pixel_criterion:
     name: L1Loss
-
-export_model:
-  - {name: 'generator', inputs_num: 1}
 
 dataset:
   train:
     name: SRDataset
-    gt_folder: data/PMBA/PMBA_HR_x2_sub
-    lq_folder: data/PMBA/PMBA_LR/x2_sub
+    gt_folder: ./data/PMBA/data_all_HR_x4
+    lq_folder: ./data/PMBA/data_all_LR_x4
     num_workers: 4
-    batch_size: 8
-    scale: 2
+    batch_size: 16
+    scale: 4
     preprocess:
       - name: LoadImageFromFile
         key: lq
@@ -35,8 +31,8 @@ dataset:
         input_keys: [lq, gt]
         pipeline:
           - name: SRPairedRandomCrop
-            gt_patch_size: 32
-            scale: 2
+            gt_patch_size: 192
+            scale: 4
             keys: [image, image]
           - name: PairedRandomHorizontalFlip
             keys: [image, image]
@@ -47,15 +43,15 @@ dataset:
           - name: Transpose
             keys: [image, image]
           - name: Normalize
-            mean: [0., 0., 0.]
-            std: [255., 255., 255.]
+            mean: [0., .0, 0.]
+            std: [1., 1., 1.]
             keys: [image, image]
   test:
     name: SRDataset
-    gt_folder: data/PMBA/test_gt
-    lq_folder: data/PMBA/testx2
-    scale: 2
-    preprocess:
+    gt_folder: ./data/PMBA/test_HR
+    lq_folder: ./data/PMBA/test_LR_x4
+    scale: 4
+    preprocess: 
       - name: LoadImageFromFile
         key: lq
       - name: LoadImageFromFile
@@ -66,15 +62,16 @@ dataset:
           - name: Transpose
             keys: [image, image]
           - name: Normalize
-            mean: [0., 0., 0.]
-            std: [255., 255., 255.]
+            mean: [0., .0, 0.]
+            std: [1., 1., 1.]
             keys: [image, image]
 
 lr_scheduler:
-  name: MultiStepDecay
+  name: CosineAnnealingRestartLR
   learning_rate: 0.0001
-  milestones: [200000, 400000, 500000]
-  gamma: 0.1
+  periods: [166250]
+  restart_weights: [1]
+  eta_min: !!float 1e-7
 
 optimizer:
   name: Adam
@@ -86,29 +83,30 @@ optimizer:
   beta2: 0.99
 
 validate:
-  interval: 5000
+  interval: 1000
   save_img: false
 
   metrics:
     psnr: # metric name, can be arbitrary
       name: PSNR
-      crop_border: 2
-      test_y_channel: False
+      crop_border: 4
+      test_y_channel: True
     ssim:
       name: SSIM
-      crop_border: 2
-      test_y_channel: False
+      crop_border: 4
+      test_y_channel: True
     rmse:
       name: RMSE
-      crop_border: 0
+      crop_border: 4
     mad:
       name: MAD
-      crop_border: 0
+      crop_border: 4
     pe:
       name: PE
-      crop_border: 0
+      crop_border: 4
+
 log_config:
-  interval: 10
+  interval: 100
   visiual_interval: 500
 
 snapshot_config:

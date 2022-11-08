@@ -159,17 +159,17 @@ def main_extract_subimages(args):
         opt['compression_level'] = args.compression_level
 
         # HR images
-        opt['input_folder'] = osp.join(args.data_root, 'PMBA_HR_x{}'.format(scale))
-        opt['save_folder'] = osp.join(args.data_root, 'PMBA_HR_x{}_sub'.format(scale))
+        opt['input_folder'] = osp.join(args.data_root, 'data_all_HR_x{}'.format(scale))
+        opt['save_folder'] = osp.join(args.data_root, 'data_all_HR_x{}_sub'.format(scale))
         opt['crop_size'] = args.crop_size
         opt['step'] = args.step
         opt['thresh_size'] = args.thresh_size
         extract_subimages(opt)
 
         opt['input_folder'] = osp.join(args.data_root,
-                                    f'PMBA_LR/x{scale}')
+                                    f'data_all_LR_x{scale}')
         opt['save_folder'] = osp.join(args.data_root,
-                                    f'PMBA_LR/x{scale}_sub')
+                                    f'data_all_LR_x{scale}_sub')
         opt['crop_size'] = args.crop_size // scale
         opt['step'] = args.step // scale
         opt['thresh_size'] = args.thresh_size // scale
@@ -263,7 +263,7 @@ def parse_args():
     parser.add_argument('--data-root', help='dataset root')
     parser.add_argument('--crop-size',
                         nargs='?',
-                        default=96,
+                        default=128,
                         help='cropped size for HR images')
     parser.add_argument('--step',
                         nargs='?',
@@ -283,7 +283,7 @@ def parse_args():
                         help='thread number when using multiprocessing')
     parser.add_argument('--scales',
                         type=list,
-                        default=[2, 4],
+                        default=[4],
                         help='thread number when using multiprocessing')
 
     args = parser.parse_args()

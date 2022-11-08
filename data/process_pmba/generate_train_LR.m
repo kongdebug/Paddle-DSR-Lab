@@ -1,4 +1,4 @@
-function Prepare_TestData_HR_LR()
+function generate_train_LR()
 clear all; close all; clc
 path_original = 'D:\PaddleRepo';
 dataset  = {'data_all'};
@@ -6,7 +6,7 @@ ext = {'*.jpg', '*.png', '*.bmp'};
 
 degradation = 'BI'; % BI, BD, DN
 if strcmp(degradation, 'BI') 
-    scale_all = [2,3,4,8];
+    scale_all = [4];
 else
     scale_all = 3;
 end
@@ -21,14 +21,13 @@ for idx_set = 1:length(dataset)
         name_im = filepaths(idx_im).name;
         fprintf('%d. %s: ', idx_im, name_im);
         im_ori = imread(fullfile(path_original, dataset{idx_set}, name_im));
-        if size(im_ori, 3) == 1
-            im_ori = cat(3, im_ori, im_ori, im_ori);
-        end
         for scale = scale_all
             fprintf('x%d ', scale);
             im_HR = modcrop(im_ori, scale);
             if strcmp(degradation, 'BI')
                 im_LR = imresize(im_HR, 1/scale, 'bicubic');
+                im_LR = add_noise_lr(im_LR);
+                im_LR = im_LR(:,:,1);
             elseif strcmp(degradation, 'BD')
                 im_LR = imresize_BD(im_HR, scale, 'Gaussian', 1.6); % sigma=1.6
             elseif strcmp(degradation, 'DN')
