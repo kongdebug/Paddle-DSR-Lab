@@ -1,6 +1,6 @@
 # epoch: 80 for total batch size=64
 total_iters: 960000
-output_dir: /root/paddlejob/workspace/output
+output_dir: output_dir
 
 model:
   name: WAFPModel

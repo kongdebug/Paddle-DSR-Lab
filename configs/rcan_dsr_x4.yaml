@@ -1,5 +1,5 @@
 total_iters: 166250
-output_dir: /root/paddlejob/workspace/output
+output_dir: output_dir
 # tensor range for function tensor2img
 min_max: 
   (0., 255.)

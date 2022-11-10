@@ -7,13 +7,20 @@
 
 </div>
 
-Paddle-DSR-Lab 是一款基于 PaddlePaddle 的深度图超分辨率的工具箱，是 PaddleDepth项目的成员之一。 它具有可扩展性，容易上手的特点，此外它在相同的训练策略和环境下公平比较了深度图超分辨率领域以及图像超分辨率里SOTA(state-of-the-art)的算法
+Paddle-DSR-Lab 是一款基于 PaddlePaddle 的**深度图超分辨率**的工具箱，是 PaddleDepth项目的成员之一。 它具有可扩展性，容易上手的特点，此外它在相同的数据集和环境下，以与原论文相符的训练配置，公平比较了深度图超分辨率领域以及图像超分辨率里SOTA(state-of-the-art)的算法
+
+| cones| tskuba | teddy | venus |
+| --- | --- | --- | ---|
+| ![](https://ai-studio-static-online.cdn.bcebos.com/c16beee3e7c94284ae4e4b80f1f493af4477ef019b2a4efd9cb0c604b36be866)| ![](https://ai-studio-static-online.cdn.bcebos.com/9ccf5207aa1d4285b4f57c66bb5ae47b086c3df2d74d4c54b100b8d79e68f411)| ![](https://ai-studio-static-online.cdn.bcebos.com/ca98f5eb54ba4a0c8a275bd4afdd0c1ef45ac4e70d484762b0ad93745290d426)|![](https://ai-studio-static-online.cdn.bcebos.com/3137984e2b2342139e1dbaf78ab8abc49c869340f19743e7b804d632129cd413) |
+
 
 ## 基准测试和模型库
 
 作为初始版本，Paddle-DSR-Lab目前支持以下算法。
 1. [WAFP-Net (IEEE Transactions on Multimedia 2021)[1]](docs/zh_CN/models/WAFP-Net.md)
 2. [PMBANet (IEEE Transactions on Image Processing 2019)[2]](docs/zh_CN/models/PMBANet.md)
+3. [RCAN (ECCV 2018)[3]](docs/zh_CN/models/RCAN.md)
+4. [DRN (CVPR 2020)[4]](docs/zh_CN/models/DRN.md)
 
 
 ## 安装
@@ -70,6 +77,7 @@ Paddle-DSR-Lab
     ├─configs                   # 配置文件
     ├─data                      # 数据处理
     │  ├─process_DocumentIMG    # 处理百度网盘超分比赛数据
+    │  ├─process_pmba           # 处理PMBA所用数据
     │  └─process_wafp           # 处理WAFP所用数据
     ├─docs                      # 模型以及数据集的介绍文档
     ├─ppdsr 
@@ -86,5 +94,49 @@ Paddle-DSR-Lab
     │  └─utils                  # 数据读取、日志显示等辅助工具
     └─tools                     # 训练、测试启动工具
 ```
+
+你可以按照如下步骤开发自己的算法:
+
+1. 检查你的模型是否需要新的损失函数来进行训练，如果有把损失函数加入到 `ppdsr/models/criterions`中
+2. 检查你是否需要新增模型来进行训练，如果有把模型加入到 `ppdsr/models`中
+3. 检查你是否需要新增数据集处理方式来进行训练，如果有把数据集加入到 `ppdsr/datasets`中
+4. 在`configs`中，加入你自己的配置文件（.yaml）
+
+
+## 结果
+
+我们在使用`teddy`、`cones`、`tskuba`、`venus`四张深度图作为测试集`DSR-TestData`，评测了Paddle-DSR-Lab已经实现的算法. 
+
+**注意**: 我们并没有通过额外的技巧来优化模型结果，因此你可以直接使用.yaml的配置文件来复现我们在表格中报告的精度
+
+### DSR-TestData
+|     Model        | PSNR | SSIM | RMSE | MAD | size  | 
+|-------------|-------|-------|-------|-------|--------|
+| WAFP-Net [1]| 42.0344 | 0.9834 | 2.5561 | 0.9246 | 3M | 
+| PMBANet [2] | 41.0418 | 0.9825 | 2.4728 | 0.6278 | 94.9M  |
+| RCAN [3]    | 42.5297 | 0.9850 | 2.4401 | 0.6685 | 59.6M  | 
+| DRN [4]     | 42.4906 | 0.9850 | 2.4634 | 0.6506 | 18.4M  | 
+
+
+## 贡献
+
+Paddle-DSR-Lab工具箱目前还在积极维护与完善过程中。 我们非常欢迎外部开发者为Paddle-DSR-Lab提供新功能\模型。 如果您有这方面的意愿的话，请往我们的邮箱或者issue里面反馈
+
+## 参考文献
+
+[1] Song, Xibin, Dingfu Zhou, Wei Li, Yuchao Dai, Liu Liu, Hongdong Li, Ruigang Yang, and Liangjun Zhang. ‘WAFP-Net: Weighted Attention Fusion Based Progressive Residual Learning for Depth Map Super-Resolution’. IEEE Transactions on Multimedia 24 (2022): 4113–27. https://doi.org/10.1109/TMM.2021.3118282.
+.
+
+[2] Ye, Xinchen, Baoli Sun, Zhihui Wang, Jingyu Yang, Rui Xu, Haojie Li, and Baopu Li. ‘PMBANet: Progressive Multi-Branch Aggregation Network for Scene Depth Super-Resolution’. IEEE Transactions on Image Processing 29 (2020): 7427–42. https://doi.org/10.1109/TIP.2020.3002664.
+
+[3] Zhang, Yulun, Kunpeng Li, Kai Li, Lichen Wang, Bineng Zhong, and Yun Fu. ‘Image Super-Resolution Using Very Deep Residual Channel Attention Networks’. In Computer Vision – ECCV 2018, edited by Vittorio Ferrari, Martial Hebert, Cristian Sminchisescu, and Yair Weiss, 11211:294–310. Lecture Notes in Computer Science. Cham: Springer International Publishing, 2018. https://doi.org/10.1007/978-3-030-01234-2_18.
+
+
+[4] Guo, Yong, Jian Chen, Jingdong Wang, Qi Chen, Jiezhang Cao, Zeshuai Deng, Yanwu Xu, and Mingkui Tan. ‘Closed-Loop Matters: Dual Regression Networks for Single Image Super-Resolution’. In 2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 5406–15. Seattle, WA, USA: IEEE, 2020. https://doi.org/10.1109/CVPR42600.2020.00545.
+
+
+## 联系方式
+
+- [Yuanhang Kong](https://github.com/kongdebug): 2111330@tongji.edu.cn
 
 
