@@ -41,7 +41,7 @@ see guidance in [dataset_prepare](docs/en_US/datasets) for dataset preparation.
 ### Train
 
 ```shell
-python -u tools/main.py --config-file configs/wafp_x4.yaml
+python -u tools/main.py --config-file $file_path$
 ```
 
 - The `config-file` parameter is the path to the configuration file for the training model

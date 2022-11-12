@@ -1,6 +1,6 @@
 function generate_train_LR()
 clear all; close all; clc
-path_original = 'D:\PaddleRepo';
+path_original = './data';
 dataset  = {'data_all'};
 ext = {'*.jpg', '*.png', '*.bmp'};
 

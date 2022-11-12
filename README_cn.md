@@ -42,7 +42,7 @@ pip install -r requirements.txt
 ### 训练模型
 
 ```shell
-python -u tools/main.py --config-file configs/wafp_x4.yaml
+python -u tools/main.py --config-file $file_path$
 ```
 
 - `config-file`参数为训练模型的配置文件路径
