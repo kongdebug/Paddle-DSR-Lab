@@ -6,6 +6,10 @@ A paddle implementation of the paper RCAN: Image Super-Resolution Using Very Dee
 
 Convolutional neural network (CNN) depth is of crucial importance for image super-resolution (SR). However, we observe that deeper networks for image SR are more difficult to train. The low-resolution (LR) inputs and features contain abundant low-frequency information, which is treated equally across channels, hence hindering the representational ability of CNNs. To solve these problems, we propose the very deep residual channel attention networks (RCAN). Specifically, we propose residual in residual (RIR) structure to form very deep network, which consists of several residual groups with long skip connections. Each residual group contains some residual blocks with short skip connections. Meanwhile, RIR allows abundant low-frequency information to be bypassed through multiple skip connections, making the main network focus on learning high-frequency information. Furthermore, we propose channel attention mechanism to adaptively rescale channel-wise features by considering interdependencies among channels. Extensive experiments show that our RCAN achieves better accuracy and visual improvements against state-of-the-art methods.
 
+## Data prepare
+
+The same as [DRN Data prepare](docs/en_US/models/DRN.md).
+
 ## Training
 
 As the RCAN network is designed for the image super-segmentation task, the input channels to the network are reserved for 3. The following command is executed to train the RCAN using the `PMBA` dataset

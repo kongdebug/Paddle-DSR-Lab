@@ -25,8 +25,12 @@ Paddle-DSR-Lab 是一款基于 PaddlePaddle 的**深度图超分辨率**的工�
 
 ## 安装
 
-你可以通过如下命令下载Paddle-DSR-Lab工具箱
+你可以根据如下步骤安装Paddle-DSR-Lab工具箱：
 
+- [PaddlePaddle安装](https://www.paddlepaddle.org.cn/install/quick)
+    - 版本要求：PaddlePaddle>=2.2.0, Python>=3.7
+
+- Paddle-DSR-Lab安装，通过以下命令
 ```
 git clone https://github.com/kongdebug/Paddle-DSR-Lab.git
 cd Paddle-DSR-Lab

@@ -25,7 +25,12 @@ As initial version, we support the following algoirthms. We are working on more 
 
 ## Installation
 
-You can either git clone this whole repo by:
+You can install the Paddle-DSR-Lab toolbox by following these steps:
+
+- [Install PaddlePaddle ](https://www.paddlepaddle.org.cn/install/quick)
+    - Version requirements: PaddlePaddle>=2.3.0, Python>=3.7
+
+- Paddle-DSR-Lab is installed with the following command
 
 ```
 git clone https://github.com/kongdebug/Paddle-DSR-Lab.git
